@@ -3,6 +3,9 @@ package app.shortener.controller;
 import app.shortener.service.LinkService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 public class LinkController {
 
@@ -12,18 +15,24 @@ public class LinkController {
         this.linkService = linkService;
     }
 
-    @PutMapping("/{owner}/{link}")
-    public String shortener(@PathVariable String owner,
-                            @PathVariable String link) {
-        return linkService.shortener(owner, link);
+    @GetMapping("/{link}")
+    public Object opener(@PathVariable String link) {
+        return linkService.opener(link);
     }
 
-    @GetMapping("/{owner}")
+    @PutMapping("/api/{owner}/{*link}")
+    public String shortener(HttpServletRequest request,
+                            @PathVariable String owner,
+                            @PathVariable String link) {
+        return linkService.shortener(owner, link.substring(1), request.getQueryString());
+    }
+
+    @GetMapping("/api/{owner}")
     public String getByOwner(@PathVariable String owner) {
         return linkService.linksByOwner(owner);
     }
 
-    @DeleteMapping("/{owner}/{link}")
+    @DeleteMapping("/api/{owner}/{link}")
     public String deleteLink(@PathVariable String owner,
                              @PathVariable String link) {
         return linkService.deleteLink(owner, link);

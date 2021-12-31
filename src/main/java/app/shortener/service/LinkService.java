@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.Map;
 
@@ -34,13 +35,16 @@ public class LinkService {
     }
 
     @SneakyThrows
-    public String shortener(String owner, String originalLink) {
+    public String shortener(String owner, String originalLink, String query) {
         Map<String, Object> map;
 
         try {
             var id = Long.parseLong(owner);
             var shortLink = util.getShort();
             originalLink = util.toLink(originalLink);
+            if (query != null)
+                originalLink = originalLink + "?" + query;
+
             repository.save(new Link(shortLink, originalLink, id));
 
             map = Map.of(status, created, result, shortLink);
@@ -90,6 +94,16 @@ public class LinkService {
             map = Map.of(status, illegalArgument, result, ownerNumeric);
         }
 
+        return writer.writeValueAsString(map);
+    }
+
+    @SneakyThrows
+    public Object opener(String shortLink) {
+        var link = repository.getByShortLink(shortLink);
+        if (link != null)
+            return new RedirectView(link.getOriginalLink());
+
+        Map<String, Object> map = Map.of(status, illegalArgument, result, notFound);
         return writer.writeValueAsString(map);
     }
 }

@@ -9,5 +9,4 @@ public interface LinkRepository extends JpaRepository<Link, String> {
     List<Link> getAllByOwnerId(Long ownerId);
     Link getByShortLink(String shortLink);
 //    Link getByOwnerIdAndShortLink(Long ownerId, String shortLink);
-    void deleteByShortLink(String shortLink);
 }
